@@ -1,7 +1,7 @@
 # Document Translator
 
 [![Build](https://github.com/madskristensen/DocumentTranslator/actions/workflows/build.yaml/badge.svg)](https://github.com/madskristensen/DocumentTranslator/actions/workflows/build.yaml)
-[![License](https://img.shields.io/badge/license-See%20LICENSE.txt-blue)](LICENSE.txt)
+[![License](https://img.shields.io/github/license/madskristensen/DocumentTranslator?label=license)](LICENSE.txt)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![Download](https://img.shields.io/github/v/release/madskristensen/DocumentTranslator?include_prereleases&label=download&logo=github)](https://github.com/madskristensen/DocumentTranslator/releases)
 
