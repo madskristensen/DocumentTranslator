@@ -334,6 +334,12 @@ public partial class MainWindow : Window
             _progress.Add($"{t.Code}: queued");
         }
 
+        OverallProgress.Visibility = Visibility.Visible;
+        OverallProgress.Maximum = targets.Count;
+        OverallProgress.Value = 0;
+        ProgressCountText.Text = $"0 of {targets.Count} complete";
+
+        var completed = 0;
         var progress = new Progress<(string Code, string Status)>(p =>
         {
             for (int i = 0; i < _progress.Count; i++)
@@ -341,8 +347,16 @@ public partial class MainWindow : Window
                 if (_progress[i].StartsWith(p.Code + ":", StringComparison.Ordinal))
                 {
                     _progress[i] = $"{p.Code}: {p.Status}";
-                    return;
+                    break;
                 }
+            }
+
+            if (p.Status.StartsWith("done", StringComparison.Ordinal)
+                || p.Status.StartsWith("failed", StringComparison.Ordinal))
+            {
+                completed++;
+                OverallProgress.Value = completed;
+                ProgressCountText.Text = $"{completed} of {targets.Count} complete";
             }
         });
 

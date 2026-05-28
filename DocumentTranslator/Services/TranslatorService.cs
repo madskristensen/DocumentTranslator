@@ -167,7 +167,18 @@ public sealed class TranslatorService
 
         if (!string.IsNullOrEmpty(frontmatter))
         {
-            translatedMarkdown = frontmatter + translatedMarkdown;
+            // Ensure a blank line between frontmatter and the translated body.
+            if (!frontmatter.EndsWith("\n\n", StringComparison.Ordinal)
+                && !frontmatter.EndsWith("\r\n\r\n", StringComparison.Ordinal))
+            {
+                var newline = frontmatter.Contains("\r\n", StringComparison.Ordinal) ? "\r\n" : "\n";
+                if (!frontmatter.EndsWith(newline, StringComparison.Ordinal))
+                {
+                    frontmatter += newline;
+                }
+                frontmatter += newline;
+            }
+            translatedMarkdown = frontmatter + translatedMarkdown.TrimStart('\r', '\n');
         }
 
         var dir = Path.GetDirectoryName(sourceFile) ?? ".";

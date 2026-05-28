@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:DocumentTranslator"
         mc:Ignorable="d"
         Title="Document Translator"
-        Height="760" Width="720"
-        MinHeight="600" MinWidth="560"
+        SizeToContent="Height"
+        Width="720"
+        MinHeight="500" MinWidth="560"
         Background="{DynamicResource WindowBackgroundBrush}"
         Foreground="{DynamicResource TextPrimaryBrush}"
         Icon="Assets/AppIcon.ico"
@@ -19,16 +20,15 @@
         TextOptions.TextRenderingMode="ClearType"
         UseLayoutRounding="True">
 
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="28,24,28,24">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
+    <Grid Margin="28,24,28,24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
 
         <!-- Header -->
         <Grid Grid.Row="0" Margin="0,0,0,20">
@@ -74,9 +74,12 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="FilePathBox" Grid.Column="0" IsReadOnly="True"
+                             Height="34" VerticalAlignment="Center"
+                             Padding="10,4" VerticalContentAlignment="Center"
                              ToolTip="Drag and drop a file here, or click Browse"/>
                     <Button x:Name="BrowseButton" Grid.Column="1"
-                            Content="Browse" MinWidth="100"
+                            Content="Browse" MinWidth="100" Height="34"
+                            VerticalAlignment="Center"
                             Margin="10,0,0,0" Click="BrowseButton_Click"/>
                 </Grid>
                 <TextBlock Style="{StaticResource SubtleTextStyle}"
@@ -88,15 +91,13 @@
         <!-- Source language card -->
         <Border Grid.Row="2" Style="{StaticResource CardStyle}" Margin="0,0,0,12">
             <StackPanel>
-                <TextBlock Text="Source language" Style="{StaticResource FieldLabelStyle}"/>
+                <TextBlock Style="{StaticResource FieldLabelStyle}">
+                    <Run Text="Source language"/>
+                    <Run Text=" (optional but recommended)" Foreground="{DynamicResource TextSecondaryBrush}" FontWeight="Normal"/>
+                </TextBlock>
                 <ComboBox x:Name="SourceLanguageBox"
                           DisplayMemberPath="DisplayName"
                           IsEditable="False"/>
-                <TextBlock Style="{StaticResource SubtleTextStyle}"
-                           Margin="0,8,0,0"
-                           Foreground="{DynamicResource WarningTextBrush}"
-                           TextWrapping="Wrap"
-                           Text="Specifying the source language is recommended over auto-detect for best quality."/>
             </StackPanel>
         </Border>
 
@@ -246,7 +247,20 @@
         <!-- Progress card -->
         <Border Grid.Row="5" Style="{StaticResource CardStyle}">
             <StackPanel>
-                <TextBlock Text="Progress" Style="{StaticResource FieldLabelStyle}"/>
+                <Grid Margin="0,0,0,8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Progress" Style="{StaticResource FieldLabelStyle}" Margin="0"/>
+                    <TextBlock Grid.Column="1" x:Name="ProgressCountText"
+                               Style="{StaticResource SubtleTextStyle}"
+                               VerticalAlignment="Center"/>
+                </Grid>
+                <ProgressBar x:Name="OverallProgress"
+                             Minimum="0" Maximum="1" Value="0"
+                             Visibility="Collapsed"
+                             Margin="0,0,0,10"/>
                 <ListBox x:Name="ProgressList"
                          Height="140"
                          BorderThickness="0"
@@ -254,5 +268,4 @@
             </StackPanel>
         </Border>
         </Grid>
-    </ScrollViewer>
 </Window>
