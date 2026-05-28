@@ -47,7 +47,7 @@ Drag a file in, pick your languages, and get translated copies side-by-side with
 ```powershell
 git clone https://github.com/madskristensen/DocumentTranslator.git
 cd DocumentTranslator
-dotnet run --project DocumentTranslator
+dotnet run --project src
 ```
 
 Or open `DocumentTranslator.slnx` in Visual Studio 2026 and press <kbd>F5</kbd>.

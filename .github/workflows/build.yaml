@@ -34,7 +34,7 @@ jobs:
           dotnet-quality: 'preview'
 
       - name: Restore
-        run: dotnet restore DocumentTranslator/DocumentTranslator.csproj -r ${{ matrix.rid }}
+        run: dotnet restore src/DocumentTranslator.csproj -r ${{ matrix.rid }}
 
       - name: Compute version
         id: version
@@ -46,7 +46,7 @@ jobs:
 
       - name: Publish single-file exe (${{ matrix.rid }})
         run: >
-          dotnet publish DocumentTranslator/DocumentTranslator.csproj
+          dotnet publish src/DocumentTranslator.csproj
           --configuration Release
           --runtime ${{ matrix.rid }}
           --self-contained true
