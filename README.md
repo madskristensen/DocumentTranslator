@@ -3,7 +3,7 @@
 [![Build](https://github.com/madskristensen/DocumentTranslator/actions/workflows/build.yaml/badge.svg)](https://github.com/madskristensen/DocumentTranslator/actions/workflows/build.yaml)
 [![License](https://img.shields.io/badge/license-See%20LICENSE.txt-blue)](LICENSE.txt)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![Platform](https://img.shields.io/badge/platform-Windows-0078D6?logo=windows&logoColor=white)](#)
+[![Download](https://img.shields.io/github/v/release/madskristensen/DocumentTranslator?label=download&logo=github)](https://github.com/madskristensen/DocumentTranslator/releases)
 
 A lightweight Windows desktop app for translating whole documents into one or more languages using **Azure AI Translator**.
 
@@ -11,10 +11,12 @@ Drag a file in, pick your languages, and get translated copies side-by-side with
 
 ---
 
+![Main window](art/main-window.png)
+
 ## ✨ Features
 
 - 🌍 **Translate to many languages at once** — pick one or more targets in a single run.
-- 📄 **Multiple formats supported** — Word (`.docx`), PDF, HTML, Markdown, and plain text.
+- 📄 **Multiple formats supported** — Word (`.docx`), PowerPoint (`.pptx`), Excel (`.xlsx`), PDF, HTML, Markdown, and plain text.
 - 🪄 **Drag-and-drop** — just drop a document onto the window.
 - 🎯 **Smart source detection** — choose a source language or let Azure auto-detect.
 - 🧠 **Powered by Azure AI Translator** — high-quality, document-level translation that preserves layout.
@@ -22,13 +24,15 @@ Drag a file in, pick your languages, and get translated copies side-by-side with
 
 ## 📦 Supported file types
 
-| Type     | Extensions          |
-| -------- | ------------------- |
-| Word     | `.docx`             |
-| PDF      | `.pdf`              |
-| HTML     | `.html`, `.htm`     |
-| Markdown | `.md`, `.markdown`  |
-| Text     | `.txt`              |
+| Type       | Extensions          |
+| ---------- | ------------------- |
+| Word       | `.docx`             |
+| PowerPoint | `.pptx`             |
+| Excel      | `.xlsx`             |
+| PDF        | `.pdf`              |
+| HTML       | `.html`, `.htm`     |
+| Markdown   | `.md`, `.markdown`  |
+| Text       | `.txt`              |
 
 ## 🚀 Getting started
 
@@ -54,6 +58,8 @@ Or open `DocumentTranslator.slnx` in Visual Studio 2026 and press <kbd>F5</kbd>.
 2. Click the ⚙️ **Settings** button in the top-right.
 3. Enter your **Translator endpoint** and **key**.
 4. Save — you're ready to translate.
+
+![Settings](art/settings.png)
 
 ## 🧭 How to use
 
