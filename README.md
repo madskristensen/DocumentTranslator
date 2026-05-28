@@ -3,7 +3,7 @@
 [![Build](https://github.com/madskristensen/DocumentTranslator/actions/workflows/build.yaml/badge.svg)](https://github.com/madskristensen/DocumentTranslator/actions/workflows/build.yaml)
 [![License](https://img.shields.io/badge/license-See%20LICENSE.txt-blue)](LICENSE.txt)
 [![.NET](https://img.shields.io/badge/.NET-10-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
-[![Download](https://img.shields.io/github/v/release/madskristensen/DocumentTranslator?label=download&logo=github)](https://github.com/madskristensen/DocumentTranslator/releases)
+[![Download](https://img.shields.io/github/v/release/madskristensen/DocumentTranslator?include_prereleases&label=download&logo=github)](https://github.com/madskristensen/DocumentTranslator/releases)
 
 A lightweight Windows desktop app for translating whole documents into one or more languages using **Azure AI Translator**.
 
@@ -42,16 +42,6 @@ Drag a file in, pick your languages, and get translated copies side-by-side with
 - [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - An [Azure AI Translator](https://learn.microsoft.com/azure/ai-services/translator/) resource (key + endpoint)
 
-### Build & run
-
-```powershell
-git clone https://github.com/madskristensen/DocumentTranslator.git
-cd DocumentTranslator
-dotnet run --project src
-```
-
-Or open `DocumentTranslator.slnx` in Visual Studio 2026 and press <kbd>F5</kbd>.
-
 ### Configure Azure credentials
 
 1. Launch the app.
@@ -75,6 +65,16 @@ Translated files are written next to the source, suffixed with the target langua
 - [.NET 10](https://dotnet.microsoft.com/) + WPF
 - [Azure.AI.Translation.Document](https://www.nuget.org/packages/Azure.AI.Translation.Document)
 - [Markdig](https://github.com/xoofx/markdig) & [ReverseMarkdown](https://github.com/mysticmind/reversemarkdown-net) for Markdown round-tripping
+
+### Build & run
+
+```powershell
+git clone https://github.com/madskristensen/DocumentTranslator.git
+cd DocumentTranslator
+dotnet run --project src
+```
+
+Or open `DocumentTranslator.slnx` in Visual Studio 2026 and press <kbd>F5</kbd>.
 
 ## 🤝 Contributing
 
