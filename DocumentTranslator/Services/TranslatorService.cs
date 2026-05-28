@@ -127,10 +127,13 @@ public sealed class TranslatorService
     {
         var markdown = await File.ReadAllTextAsync(sourceFile, ct).ConfigureAwait(false);
 
+        // Strip YAML frontmatter so it isn't mangled by translation, and re-prepend it verbatim.
+        var (frontmatter, body) = ExtractYamlFrontmatter(markdown);
+
         var pipeline = new Markdig.MarkdownPipelineBuilder()
             .UseAdvancedExtensions()
             .Build();
-        var html = Markdig.Markdown.ToHtml(markdown, pipeline);
+        var html = Markdig.Markdown.ToHtml(body, pipeline);
 
         // Wrap in a minimal HTML document so the service treats it as text/html cleanly.
         var wrapped = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"></head><body>" + html + "</body></html>";
@@ -162,6 +165,11 @@ public sealed class TranslatorService
         new HtmlBlockPassthroughConverter(converter, "summary", recurseChildren: false);
         var translatedMarkdown = converter.Convert(translatedHtml);
 
+        if (!string.IsNullOrEmpty(frontmatter))
+        {
+            translatedMarkdown = frontmatter + translatedMarkdown;
+        }
+
         var dir = Path.GetDirectoryName(sourceFile) ?? ".";
         var baseName = Path.GetFileNameWithoutExtension(sourceFile);
         var ext = Path.GetExtension(sourceFile);
@@ -169,6 +177,121 @@ public sealed class TranslatorService
 
         await File.WriteAllTextAsync(outPath, translatedMarkdown, ct).ConfigureAwait(false);
         return outPath;
+    }
+
+    private static (string Frontmatter, string Body) ExtractYamlFrontmatter(string markdown)
+    {
+        if (string.IsNullOrEmpty(markdown))
+        {
+            return (string.Empty, markdown);
+        }
+
+        // Skip optional UTF-8 BOM.
+        var start = 0;
+        if (markdown[0] == '\uFEFF')
+        {
+            start = 1;
+        }
+
+        // Must start with --- on its own line (allow trailing whitespace, then CRLF/LF).
+        if (!StartsWithFence(markdown, start, out var firstFenceEnd))
+        {
+            return (string.Empty, markdown);
+        }
+
+        // Find the closing fence (--- or ...).
+        var searchFrom = firstFenceEnd;
+        while (searchFrom < markdown.Length)
+        {
+            var lineEnd = IndexOfLineEnd(markdown, searchFrom, out var lineTerminatorLength);
+            var lineLen = lineEnd - searchFrom;
+            if (IsFenceLine(markdown, searchFrom, lineLen))
+            {
+                var fmEnd = lineEnd + lineTerminatorLength;
+                var frontmatter = markdown.Substring(0, fmEnd);
+                var body = markdown.Substring(fmEnd);
+                return (frontmatter, body);
+            }
+            searchFrom = lineEnd + lineTerminatorLength;
+        }
+
+        // No closing fence — treat as not frontmatter.
+        return (string.Empty, markdown);
+    }
+
+    private static bool StartsWithFence(string s, int start, out int afterLine)
+    {
+        var lineEnd = IndexOfLineEnd(s, start, out var lineTerminatorLength);
+        var lineLen = lineEnd - start;
+        if (IsTripleDash(s, start, lineLen))
+        {
+            afterLine = lineEnd + lineTerminatorLength;
+            return true;
+        }
+        afterLine = start;
+        return false;
+    }
+
+    private static bool IsFenceLine(string s, int start, int length)
+        => IsTripleDash(s, start, length) || IsTripleDot(s, start, length);
+
+    private static bool IsTripleDash(string s, int start, int length)
+    {
+        if (length < 3)
+        {
+            return false;
+        }
+        if (s[start] != '-' || s[start + 1] != '-' || s[start + 2] != '-')
+        {
+            return false;
+        }
+        for (int i = start + 3; i < start + length; i++)
+        {
+            if (s[i] != ' ' && s[i] != '\t')
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static bool IsTripleDot(string s, int start, int length)
+    {
+        if (length < 3)
+        {
+            return false;
+        }
+        if (s[start] != '.' || s[start + 1] != '.' || s[start + 2] != '.')
+        {
+            return false;
+        }
+        for (int i = start + 3; i < start + length; i++)
+        {
+            if (s[i] != ' ' && s[i] != '\t')
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static int IndexOfLineEnd(string s, int from, out int terminatorLength)
+    {
+        for (int i = from; i < s.Length; i++)
+        {
+            if (s[i] == '\r')
+            {
+                terminatorLength = (i + 1 < s.Length && s[i + 1] == '\n') ? 2 : 1;
+                return i;
+            }
+            if (s[i] == '\n')
+            {
+                terminatorLength = 1;
+                return i;
+            }
+        }
+        terminatorLength = 0;
+        return s.Length;
     }
 
     private static string GuessContentType(string path)

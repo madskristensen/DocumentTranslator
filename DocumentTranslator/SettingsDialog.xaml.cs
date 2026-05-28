@@ -8,6 +8,10 @@ public partial class SettingsDialog : Window
     public SettingsDialog()
     {
         InitializeComponent();
+        ThemeManager.ApplyTitleBar(this);
+        ThemeManager.ThemeChanged += OnThemeChanged;
+        Closed += (_, _) => ThemeManager.ThemeChanged -= OnThemeChanged;
+
         var settings = SettingsStore.Load();
         EndpointBox.Text = settings.Endpoint;
         var key = SettingsStore.UnprotectKey(settings);
@@ -15,6 +19,11 @@ public partial class SettingsDialog : Window
         {
             KeyBox.Password = key;
         }
+    }
+
+    private void OnThemeChanged(object? sender, System.EventArgs e)
+    {
+        ThemeManager.ApplyTitleBar(this);
     }
 
     private void SaveButton_Click(object sender, RoutedEventArgs e)

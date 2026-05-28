@@ -5,65 +5,254 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DocumentTranslator"
         mc:Ignorable="d"
-        Title="Document Translator" Height="640" Width="640"
+        Title="Document Translator"
+        Height="760" Width="720"
+        MinHeight="600" MinWidth="560"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        Foreground="{DynamicResource TextPrimaryBrush}"
         Icon="Assets/AppIcon.ico"
         AllowDrop="True"
         PreviewDragOver="Window_PreviewDragOver"
         Drop="Window_Drop"
-        WindowStartupLocation="CenterScreen">
-    <Grid Margin="16">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
+        WindowStartupLocation="CenterScreen"
+        TextOptions.TextFormattingMode="Ideal"
+        TextOptions.TextRenderingMode="ClearType"
+        UseLayoutRounding="True">
 
-        <Grid Grid.Row="0" Margin="0,0,0,12">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Margin="28,24,28,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Column="0" Text="Document Translator" FontSize="20" FontWeight="SemiBold"
-                       VerticalAlignment="Center"/>
-            <Button Grid.Column="1" x:Name="SettingsButton" Width="32" Height="32"
-                    ToolTip="Settings" Click="SettingsButton_Click"
-                    Background="Transparent" BorderThickness="0" Cursor="Hand">
-                <TextBlock Text="&#x2699;" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            </Button>
+            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                <TextBlock Text="Document Translator" Style="{StaticResource TitleTextStyle}"/>
+                <TextBlock Text="Translate documents into multiple languages with Azure AI."
+                           Style="{StaticResource SubtleTextStyle}"
+                           Margin="0,4,0,0"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button x:Name="ThemeButton"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTip="Toggle theme (Light / Dark / System)"
+                        Click="ThemeButton_Click"
+                        Margin="0,0,4,0">
+                    <TextBlock x:Name="ThemeIcon"
+                               Text="&#xE706;"
+                               FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                               FontSize="18"/>
+                </Button>
+                <Button x:Name="SettingsButton"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTip="Settings"
+                        Click="SettingsButton_Click">
+                    <TextBlock Text="&#xE713;"
+                               FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                               FontSize="18"/>
+                </Button>
+            </StackPanel>
         </Grid>
 
-        <TextBlock Grid.Row="1" Text="Source document" FontWeight="SemiBold"/>
-        <Grid Grid.Row="2" Margin="0,4,0,12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="Auto"/>
-            </Grid.ColumnDefinitions>
-            <TextBox x:Name="FilePathBox" Grid.Column="0" IsReadOnly="True"/>
-            <Button x:Name="BrowseButton" Grid.Column="1" Content="Browse..." Width="100" Margin="8,0,0,0"
-                    Click="BrowseButton_Click"/>
+        <!-- Source document card -->
+        <Border Grid.Row="1" Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="Source document" Style="{StaticResource FieldLabelStyle}"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBox x:Name="FilePathBox" Grid.Column="0" IsReadOnly="True"
+                             ToolTip="Drag and drop a file here, or click Browse"/>
+                    <Button x:Name="BrowseButton" Grid.Column="1"
+                            Content="Browse" MinWidth="100"
+                            Margin="10,0,0,0" Click="BrowseButton_Click"/>
+                </Grid>
+                <TextBlock Style="{StaticResource SubtleTextStyle}"
+                           Margin="0,8,0,0"
+                           Text="Tip: you can also drag a document anywhere onto the window."/>
+            </StackPanel>
+        </Border>
+
+        <!-- Source language card -->
+        <Border Grid.Row="2" Style="{StaticResource CardStyle}" Margin="0,0,0,12">
+            <StackPanel>
+                <TextBlock Text="Source language" Style="{StaticResource FieldLabelStyle}"/>
+                <ComboBox x:Name="SourceLanguageBox"
+                          DisplayMemberPath="DisplayName"
+                          IsEditable="False"/>
+                <TextBlock Style="{StaticResource SubtleTextStyle}"
+                           Margin="0,8,0,0"
+                           Foreground="{DynamicResource WarningTextBrush}"
+                           TextWrapping="Wrap"
+                           Text="Specifying the source language is recommended over auto-detect for best quality."/>
+            </StackPanel>
+        </Border>
+
+        <!-- Target languages card -->
+        <Border Grid.Row="3" Style="{StaticResource CardStyle}" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="Target languages" Style="{StaticResource FieldLabelStyle}"/>
+
+                <Grid>
+                    <ToggleButton x:Name="TargetDropdownToggle"
+                                  MinHeight="34"
+                                  HorizontalContentAlignment="Stretch"
+                                  Background="{DynamicResource ControlBackgroundBrush}"
+                                  BorderBrush="{DynamicResource ControlBorderBrush}"
+                                  BorderThickness="1"
+                                  Foreground="{DynamicResource TextPrimaryBrush}"
+                                  Cursor="Hand">
+                        <ToggleButton.Template>
+                            <ControlTemplate TargetType="ToggleButton">
+                                <Border x:Name="Bd"
+                                        Background="{TemplateBinding Background}"
+                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                        CornerRadius="6"
+                                        TextElement.Foreground="{TemplateBinding Foreground}"
+                                        SnapsToDevicePixels="True">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <ContentPresenter Grid.Column="0"
+                                                          Margin="10,8"
+                                                          VerticalAlignment="Center"
+                                                          HorizontalAlignment="Left"/>
+                                        <Path Grid.Column="1"
+                                              Width="10" Height="6"
+                                              Margin="0,0,12,0"
+                                              VerticalAlignment="Center"
+                                              Stretch="Uniform"
+                                              Fill="{DynamicResource TextSecondaryBrush}"
+                                              Data="M 0,0 L 10,0 L 5,6 Z"/>
+                                    </Grid>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource ControlHoverBorderBrush}"/>
+                                    </Trigger>
+                                    <Trigger Property="IsChecked" Value="True">
+                                        <Setter TargetName="Bd" Property="BorderBrush" Value="{DynamicResource AccentBrush}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </ToggleButton.Template>
+                        <TextBlock x:Name="TargetSummaryText"
+                                   Text="Select languages..."
+                                   Foreground="{DynamicResource TextTertiaryBrush}"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </ToggleButton>
+
+                    <Popup x:Name="TargetPopup"
+                           PlacementTarget="{Binding ElementName=TargetDropdownToggle}"
+                           Placement="Bottom"
+                           StaysOpen="False"
+                           AllowsTransparency="True"
+                           PopupAnimation="Slide"
+                           IsOpen="{Binding IsChecked, ElementName=TargetDropdownToggle, Mode=TwoWay}">
+                        <Border Background="{DynamicResource CardBackgroundBrush}"
+                                BorderBrush="{DynamicResource CardBorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                MinWidth="{Binding ActualWidth, ElementName=TargetDropdownToggle}"
+                                Margin="0,4,0,0">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="16" ShadowDepth="2" Opacity="0.25" Color="Black"/>
+                            </Border.Effect>
+                            <StackPanel>
+                                <Grid Margin="8,8,8,4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox x:Name="TargetFilterBox" Grid.Column="0"
+                                             Style="{StaticResource SearchTextBoxStyle}"
+                                             Tag="Search languages..."
+                                             TextChanged="TargetFilterBox_TextChanged"/>
+                                    <Button Grid.Column="1" Content="Clear" Margin="6,0,0,0"
+                                            Padding="10,4" MinHeight="0"
+                                            Click="ClearTargetsButton_Click"/>
+                                    <Button Grid.Column="2" Content="Done" Margin="6,0,0,0"
+                                            Padding="10,4" MinHeight="0"
+                                            Style="{StaticResource AccentButtonStyle}"
+                                            Click="DoneTargetsButton_Click"/>
+                                </Grid>
+                                <ListBox x:Name="TargetLanguagesList"
+                                         SelectionMode="Multiple"
+                                         MaxHeight="320"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         SelectionChanged="TargetLanguagesList_SelectionChanged">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid>
+                                                <CheckBox IsChecked="{Binding IsSelected, RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
+                                                          Content="{Binding DisplayName}"
+                                                          VerticalAlignment="Center"
+                                                          Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                    <ListBox.ItemContainerStyle>
+                                        <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                            <Setter Property="Padding" Value="8,4"/>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsSelected" Value="True">
+                                                    <Setter Property="Background" Value="Transparent"/>
+                                                    <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ListBox.ItemContainerStyle>
+                                </ListBox>
+                            </StackPanel>
+                        </Border>
+                    </Popup>
+                </Grid>
+
+                <TextBlock x:Name="TargetSelectionSubtext"
+                           Style="{StaticResource SubtleTextStyle}"
+                           Margin="0,8,0,0"
+                           Text="No languages selected"
+                           TextWrapping="Wrap"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Translate button -->
+        <Button Grid.Row="4"
+                x:Name="TranslateButton"
+                Content="Translate"
+                Style="{StaticResource AccentButtonStyle}"
+                HorizontalAlignment="Right"
+                MinWidth="140"
+                Margin="0,0,0,16"
+                Click="TranslateButton_Click"/>
+
+        <!-- Progress card -->
+        <Border Grid.Row="5" Style="{StaticResource CardStyle}">
+            <StackPanel>
+                <TextBlock Text="Progress" Style="{StaticResource FieldLabelStyle}"/>
+                <ListBox x:Name="ProgressList"
+                         Height="140"
+                         BorderThickness="0"
+                         Background="Transparent"/>
+            </StackPanel>
+        </Border>
         </Grid>
-
-        <TextBlock Grid.Row="3" Text="Source language" FontWeight="SemiBold"/>
-        <ComboBox Grid.Row="4" x:Name="SourceLanguageBox" Margin="0,4,0,4"
-                  DisplayMemberPath="DisplayName" IsEditable="False"/>
-        <TextBlock Grid.Row="5" Margin="0,0,0,12" Foreground="DarkOrange" TextWrapping="Wrap"
-                   Text="Tip: specifying the source language is recommended over Auto-detect for best quality."/>
-
-        <TextBlock Grid.Row="6" Text="Target languages (pick one or more)" FontWeight="SemiBold" Margin="0,0,0,4"/>
-        <ListBox Grid.Row="7" x:Name="TargetLanguagesList" SelectionMode="Multiple"
-                 DisplayMemberPath="DisplayName"/>
-
-        <StackPanel Grid.Row="8" Orientation="Horizontal" Margin="0,12,0,0">
-            <Button x:Name="TranslateButton" Content="Translate" Width="120" Margin="0,0,8,0" Click="TranslateButton_Click"/>
-        </StackPanel>
-
-        <ListBox Grid.Row="9" x:Name="ProgressList" Margin="0,12,0,0" Height="140"/>
-    </Grid>
+    </ScrollViewer>
 </Window>

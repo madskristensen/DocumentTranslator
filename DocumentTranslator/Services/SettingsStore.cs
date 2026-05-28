@@ -14,6 +14,8 @@ public sealed class Settings
 	public string? LastSourceLanguage { get; set; }
 
 	public List<string> LastTargetLanguages { get; set; } = new();
+
+	public AppTheme Theme { get; set; } = AppTheme.System;
 }
 
 public static class SettingsStore
@@ -65,6 +67,13 @@ public static class SettingsStore
 		var existing = Load();
 		existing.LastSourceLanguage = sourceLanguage;
 		existing.LastTargetLanguages = targetLanguages.ToList();
+		Save(existing);
+	}
+
+	public static void SaveTheme(AppTheme theme)
+	{
+		var existing = Load();
+		existing.Theme = theme;
 		Save(existing);
 	}
 

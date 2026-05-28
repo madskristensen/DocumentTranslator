@@ -1,6 +1,9 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
 using DocumentTranslator.Models;
 using DocumentTranslator.Services;
 using Microsoft.Win32;
@@ -14,12 +17,53 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<string> _progress = new();
     private TranslatorService? _translator;
     private IReadOnlyList<Language> _languages = Array.Empty<Language>();
+    private ICollectionView? _targetView;
 
     public MainWindow()
     {
         InitializeComponent();
+        ThemeManager.ApplyTitleBar(this);
+        ThemeManager.ThemeChanged += OnThemeChanged;
+        UpdateThemeIcon();
         ProgressList.ItemsSource = _progress;
         Loaded += async (_, _) => await InitializeAsync();
+        Closed += (_, _) => ThemeManager.ThemeChanged -= OnThemeChanged;
+    }
+
+    private void OnThemeChanged(object? sender, EventArgs e)
+    {
+        ThemeManager.ApplyTitleBar(this);
+        UpdateThemeIcon();
+    }
+
+    private void ThemeButton_Click(object sender, RoutedEventArgs e)
+    {
+        var next = ThemeManager.Current switch
+        {
+            AppTheme.Light => AppTheme.Dark,
+            AppTheme.Dark => AppTheme.System,
+            _ => AppTheme.Light,
+        };
+        ThemeManager.Apply(next);
+        try
+        {
+            SettingsStore.SaveTheme(next);
+        }
+        catch
+        {
+            // Best effort.
+        }
+    }
+
+    private void UpdateThemeIcon()
+    {
+        // E706 = Sun (Light), E708 = Moon (Dark), E771 = Auto/Settings (System).
+        (ThemeIcon.Text, ThemeButton.ToolTip) = ThemeManager.Current switch
+        {
+            AppTheme.Light => ("\uE706", "Theme: Light (click for Dark)"),
+            AppTheme.Dark => ("\uE708", "Theme: Dark (click for System)"),
+            _ => ("\uE771", "Theme: System (click for Light)"),
+        };
     }
 
     private async Task InitializeAsync()
@@ -84,7 +128,9 @@ public partial class MainWindow : Window
         var sources = new List<Language> { AutoDetect };
         sources.AddRange(_languages);
         SourceLanguageBox.ItemsSource = sources;
-        TargetLanguagesList.ItemsSource = _languages;
+
+        _targetView = new ListCollectionView(_languages.ToList());
+        TargetLanguagesList.ItemsSource = _targetView;
 
         var settings = SettingsStore.Load();
 
@@ -102,6 +148,65 @@ public partial class MainWindow : Window
                 TargetLanguagesList.SelectedItems.Add(lang);
             }
         }
+
+        UpdateTargetSummary();
+    }
+
+    private void TargetLanguagesList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        => UpdateTargetSummary();
+
+    private void TargetFilterBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_targetView is null)
+        {
+            return;
+        }
+        var filter = TargetFilterBox.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrEmpty(filter))
+        {
+            _targetView.Filter = null;
+        }
+        else
+        {
+            _targetView.Filter = obj =>
+                obj is Language lang &&
+                (lang.DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase)
+                 || lang.Code.Contains(filter, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    private void ClearTargetsButton_Click(object sender, RoutedEventArgs e)
+    {
+        TargetLanguagesList.SelectedItems.Clear();
+        UpdateTargetSummary();
+    }
+
+    private void DoneTargetsButton_Click(object sender, RoutedEventArgs e)
+        => TargetDropdownToggle.IsChecked = false;
+
+    private void UpdateTargetSummary()
+    {
+        var selected = TargetLanguagesList.SelectedItems.Cast<Language>().ToList();
+        if (selected.Count == 0)
+        {
+            TargetSummaryText.Text = "Select languages...";
+            TargetSummaryText.Foreground = (System.Windows.Media.Brush)FindResource("TextTertiaryBrush");
+            TargetSelectionSubtext.Text = "No languages selected";
+            return;
+        }
+
+        var names = string.Join(", ", selected.Select(l => l.DisplayName));
+        TargetSummaryText.Text = selected.Count switch
+        {
+            1 => names,
+            <= 3 => names,
+            _ => $"{selected.Count} languages selected",
+        };
+        TargetSummaryText.Foreground = (System.Windows.Media.Brush)FindResource("TextPrimaryBrush");
+
+        TargetSelectionSubtext.Text = selected.Count == 1
+            ? $"1 language selected: {names}"
+            : $"{selected.Count} languages selected: {names}";
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e) => OpenSettings();
