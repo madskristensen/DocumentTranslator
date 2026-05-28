@@ -51,6 +51,8 @@ jobs:
           --runtime ${{ matrix.rid }}
           --self-contained true
           -p:PublishSingleFile=true
+          -p:PublishTrimmed=true
+          -p:TrimMode=partial
           -p:IncludeNativeLibrariesForSelfExtract=true
           -p:EnableCompressionInSingleFile=true
           -p:DebugType=embedded
